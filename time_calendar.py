@@ -11,7 +11,7 @@ def create_calendar(year, month):
     week_days=["M","T","W","R","F","S","U"]
     row=[]
     for day in week_days:#для кожного дня тижня
-        row.append(types.InlineKeyboardButton(day,callback_data="ignore"))#створити кнопку
+        row.append(types.InlineKeyboardButton(day, callback_data="ignore"))#створити кнопку
     markup.row(*row)#додати рядок "M","T","W","R","F","S","U"
     my_calendar = calendar.monthcalendar(year, month)
     print(my_calendar)
