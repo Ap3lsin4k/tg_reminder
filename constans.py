@@ -1,4 +1,4 @@
-token = "543322633:AAEg7Gn7bP4Y7Qg2kkDPUbwz2kozxwd-DUc"
+token = "543322633:AAEg7Gn7bP4Y7Qg2kkDPUbwz2kozxwd-DUc" #  @optimizer_bot
 """
 import telebot
 
