@@ -13,6 +13,7 @@ bot = telebot.TeleBot(constans.token)
 
 def log(message):
     print("======", datetime.datetime.now())
+    print("message:", message.text)
     print("g.location", g.location)
     print("GROUP:", g.group)
     for note_name in myClass.work.some_group:
@@ -298,13 +299,13 @@ def handle_language(message):
 def get_day(call):
     # якщо функція нормально спрацювала повертається 'workers/add_note_time2',
     if g.location[0] == 'workers':
-        g.location = myClass.work.get_day(bot, call, g.location, g.lang)  # інакше повертається місце де ми зараз є ('workers/add_note_time1')
+        g.location = myClass.work.get_day(bot, call, g.location, g.lang, 1)  # інакше повертається місце де ми зараз є ('workers/add_note_time1')
     elif g.location[0] == 'home':
-        g.location = myClass.home.get_day(bot, call, g.location, g.lang)
+        g.location = myClass.home.get_day(bot, call, g.location, g.lang, 1)
     elif g.location[0] == 'urgent':
-        g.location = myClass.urgent.get_day(bot, call, g.location, g.lang)
+        g.location = myClass.urgent.get_day(bot, call, g.location, g.lang, 1)
     elif g.location[0] == 'other':
-        g.location = myClass.other[g.count_name_group_other].get_day(bot, call, g.location, g.lang)
+        g.location = myClass.other[g.count_name_group_other].get_day(bot, call, g.location, g.lang, 2)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next-month')
@@ -316,7 +317,7 @@ def next_month(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.next_month(bot, call, g.lang)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].next_month(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].next_month(bot, call, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'previous-month')
@@ -328,7 +329,7 @@ def previous_month(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.previous_month(bot, call, g.lang)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].previous_month(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].previous_month(bot, call, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours' or call.data == 'hours_inc')
@@ -340,7 +341,7 @@ def hours_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.hours_increment(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].hours_increment(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].hours_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours_dec')
@@ -352,7 +353,7 @@ def hours_decrement(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.hours_decrement(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].hours_decrement(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].hours_decrement(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_inc')
@@ -364,7 +365,7 @@ def minut_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minut_increment(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].minut_increment(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].minut_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minutes')
@@ -376,7 +377,7 @@ def minutes_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minutes_increment(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].minutes_increment(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].minutes_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_dec')
@@ -388,7 +389,7 @@ def minut_decrement(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minut_decrement(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].minut_decrement(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].minut_decrement(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'ignore')
@@ -400,7 +401,7 @@ def ignore(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.ignore(bot, call)
     elif g.location[0] == 'other':
-        myClass.other[g.count_name_group_other].ignore(bot, call, g.location, g.lang)
+        myClass.other[g.count_name_group_other].ignore(bot, call)
 
 
 bot.polling(none_stop=True, interval=0)

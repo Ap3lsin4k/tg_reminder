@@ -83,8 +83,8 @@ class NOTE:
         else:
             bot.send_message(message.chat.id, "Please, choose a date", reply_markup=markup)  # виводимо календар
 
-    # inline handle
-    def get_day(self, bot, call, location, lang):
+    # inline handle #   ,      ,       ,     ,['other', 'group_name', 'add_note_time1']
+    def get_day(self, bot, call, location, lang, index_location):
         chat_id = call.message.chat.id
         # myClass.work.current_shown_dates.get(chat_id)
         saved_date = self.current_shown_dates.get(chat_id)
@@ -97,8 +97,9 @@ class NOTE:
             bot.send_message(chat_id, str(date))
             bot.answer_callback_query(call.id, text="")
 
-            if location[1] == 'add_note_time1':
-                location[1] = 'add_note_time2'
+            #              fitcha
+            if location[index_location] == 'add_note_time1':
+                location[index_location] = 'add_note_time2'
                 # get_watch()
                 if lang == 'ru':
                     bot.send_message(call.from_user.id, "Выберете время", reply_markup=create_watch(self.some_group[self.edit_note_work]['time']['hour'], self.some_group[self.edit_note_work]['time']['minute']))
