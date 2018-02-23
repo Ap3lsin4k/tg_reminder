@@ -9,10 +9,10 @@ class NOTE:
         self.edit_note_work = ""
         self.current_shown_dates = {}  # зберігає дату користувача під ключем = [message.from_user.id]
 
-        now = datetime.datetime.now()
+        #now = datetime.datetime.now()
         #self.time = {'year': now.year, 'month': now.month, 'day': now.day,
         #            'hour': 12, 'minute': 0}  # delete
-
+        print("constructor ", name_button)
 
     def add_note(self, bot, message, lang):
         hide_markup = telebot.types.ReplyKeyboardRemove()
@@ -214,3 +214,5 @@ class NOTE:
 work = NOTE("WORKERS")
 home = NOTE("HOME")
 urgent = NOTE("URGENT")
+other = {}
+# other["name_group"] = NOTE("NAME_GROUP"]
