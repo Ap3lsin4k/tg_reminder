@@ -14,14 +14,14 @@ def create_calendar(year, month):
         row.append(types.InlineKeyboardButton(day, callback_data="ignore"))#створити кнопку
     markup.row(*row)#додати рядок "M","T","W","R","F","S","U"
     my_calendar = calendar.monthcalendar(year, month)
-    print(my_calendar)
+    # print(my_calendar)
     for week in my_calendar:#[[0, 0, 0, 1, 2, 3, 4], [5, 6, 7, 8, 9, 10, 11], [12, 13, 14, 15, 16, 17, 18], [19, 20, 21, 22, 23, 24, 25], [26, 27, 28, 0, 0, 0, 0]]
         row=[]
         for day in week:#[0, 0, 0, 1, 2, 3, 4]
             if(day==0):
-                row.append(types.InlineKeyboardButton(" ",callback_data="ignore"))#при зворотньомцу виклику повертажться "ignore"
+                row.append(types.InlineKeyboardButton(" ", callback_data="ignore"))#при зворотньомцу виклику повертажться "ignore"
             else:
-                row.append(types.InlineKeyboardButton(str(day),callback_data="calendar-day-"+str(day)))#при зворотньому виклику повертався "calendar-day-13"
+                row.append(types.InlineKeyboardButton(str(day), callback_data="calendar-day-"+str(day)))#при зворотньому виклику повертався "calendar-day-13"
         markup.row(*row)#[ ,  ,  , 1, 2, 3, 4]
     #Last row - Buttons
     row=[]

@@ -2,132 +2,95 @@
 import telebot
 from telebot import types
 import datetime
-from time_calendar import create_calendar, create_watch
+# from time_calendar import create_calendar, create_watch
 import constans
-#
+import myClass
+import g  # global
 
+#bot = myClass.bot # idea
 bot = telebot.TeleBot(constans.token)
-# поточна мова, місце, нові групи, нові замітки у воркс
-global lang, location
-global group, work, edit_note_work
-global years, month, days, hours, minutes# sec = 0 за замовчуванням
-now = datetime.datetime.now()
-years, month, days = now.year, now.month, now.day
-hours, minutes = 12, 0
-current_shown_dates = {}
-lang = "en"
-location = "main_menu"#{'main_menu': {'workers': 'workers/add_note'}, 'home', 'urgent', 'settings', 'other', 'add_group'}
-group = []#{}
-work = {}
-edit_note_work = ""
 
 
 def log(message):
-    global lang, location, group, work, edit_note_work
-    global hours, minutes, days, month, years
-    print("\n------ begin")
-    from datetime import datetime
-    print(datetime.now())
-    print("Lang:", lang)
-    print("Location:", location)
-    print("Group:", group)
-    print("Work:", work)
-    print("(current_shown_dates):", current_shown_dates)
-    print(years, month, days, hours, minutes)
-    print("count edit note work:", str(edit_note_work))
+    for note_name in myClass.work.some_group:
+        print("\'{}\': ".format(note_name), myClass.work.some_group[note_name])
+    pass
+    # print("\n------ begin")
+    # print(datetime.datetime.now())
+    # print("Lang:", g.lang)
+    # print("Location:", g.location)
+    # print("Group:", g.group)
+    # print("Work:", myClass.work.some_group)
+    # print("(current_shown_dates):", myClass.work.current_shown_dates)
+    # print(myClass.work.time)
+    # print("count edit note work:", str(myClass.work.edit_note_work))
+    # print("\n------ end")
 
-    # with open('log.txt', 'w') as f:
-    #     f.write("\n------")
-    #     from datetime import datetime
-    #     f.write(datetime.now())
-    #     f.write("Lang:", lang)
-    #     f.write("Location:", location)
-    #     f.write("Group:", group)
-    print("\n------ end")
 
 def main_menu(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-
-    if lang == 'ru':
-        user_markup.row('Рабочие', 'Домашние')# 💼🏢 🏠
-        user_markup.row('Срочные')# ⏰
-        user_markup.row('Настройки', 'Другие')# ⚙ \u****
-        user_markup.row('Добавить группу', 'Назад')# + \u**** 🔙
+    if g.lang == 'ru':
+        user_markup.row('Рабочие', 'Домашние')  # 💼🏢 🏠
+        user_markup.row('Срочные')  # ⏰
+        user_markup.row('Настройки', 'Другие')  # ⚙ \u****
+        user_markup.row('Добавить группу', 'Назад')  # + \u**** 🔙
         bot.send_message(message.from_user.id, 'Вы в главном меню.', reply_markup=user_markup)
     else:
-        user_markup.row('Workers', 'Home')# 🏠
+        user_markup.row('Workers', 'Home')  # 🏠
         user_markup.row('Urgent')
         user_markup.row('Settings', 'Other')
         user_markup.row('Add group', 'Back')
         bot.send_message(message.from_user.id, 'You are in the main menu.', reply_markup=user_markup)
         'You are in the main menu'
 
-def workers(message):
-    global lang
-    global location
-    global group
-    global work # ключ "" не виводити НІКОЛИ
-    #work = {
-    #    'go to eat': {'time': "10:00", 'description': "you go to eat, and start eat"},
-        #'watch film': {'time': "12:00", 'descript': "this descript for watch film"},
-        #'sleep': {'time': "21:00", 'descript': "go to bed and sleep"},
-        # 'wake up': {'time': "9:00", 'descript': "WAAAKEEEEEE UUUUUUUUUUUP"}
-    #};
 
-    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    for i in work:
-        if i != "":  # для Debug
-            #                                                                                                 день                           месяц                            год
-            format_date = str(work[i]['time'][3]) + ":" + str(work[i]['time'][4]) + "\n" + str(work[i]['time'][2]) + "." + str(work[i]['time'][1]) + "." + str(work[i]['time'][0])
-            user_markup.row(i, format_date)  # Вивести замітку і гарно відформатований час       18:36
-            del format_date                  #                                                 21.2.2018
-    if lang == 'ru':
-        user_markup.row('Добавить заметку', 'Назад')
-        bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
-    else:
-        user_markup.row('Add note', 'Back')
-        bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
+def workers(message):
+    myClass.work.main(bot, message, g.lang)
+
+
 def home(message):
-    global lang
-    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    if lang == 'ru':
-        user_markup.row('Добавить заметку', 'Назад')
-        bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
-    else:
-        user_markup.row('Add note', 'Back')
-        bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
+    myClass.home.main(bot, message, g.lang)
+    # user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    # if g.lang == 'ru':
+    #     user_markup.row('Добавить заметку', 'Назад')
+    #     bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
+    # else:
+    #     user_markup.row('Add note', 'Back')
+    #     bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
+
+
 def urgent(message):
-    global lang
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    if lang == 'ru':
+    if g.lang == 'ru':
         user_markup.row('Добавить заметку', 'Назад')
         bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
     else:
         user_markup.row('Add note', 'Back')
         bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
+
+
 def sett_lang(message):
-    global lang
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
     user_markup.row('Русский', 'English')
-    user_markup.row('Назад' if lang == 'ru' else 'Back')
-    if lang == 'ru':
+
+    if g.lang == 'ru':
+        user_markup.row('Назад')
         bot.send_message(message.from_user.id, "Вы в настройках.", reply_markup=user_markup)
     else:
+        user_markup.row('Back')
         bot.send_message(message.from_user.id, "You are in the settings.", reply_markup=user_markup)
+
+
 def other(message):
-    global lang
-    global location
-    global group
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
 
-    for i in range(0, len(group), 2):
-        if (i+1) < len(group):
-            user_markup.row(group[i], group[i+1])
+    for i in range(0, len(g.group), 2):
+        if (i + 1) < len(g.group):
+            user_markup.row(g.group[i], g.group[i + 1])  # Виводим красиво по 2 кнопки на ряд
         else:
-            user_markup.row(group[i])
+            user_markup.row(g.group[i])
 
-
-    if lang == 'ru':
+    if g.lang == 'ru':
         user_markup.row("Назад")  # 'Добавить группу'
         bot.send_message(message.from_user.id, "Вы в меню \"Другие\"", reply_markup=user_markup)
     else:
@@ -138,350 +101,219 @@ def other(message):
     #         user_markup.add(group[i])
     #     user_markup.row('Back')
     #     bot.send_message(message.from_user.id, , reply_markup=user_markup)
+
+
 def add_group(message):
-    global lang
-    global location
-    global group
-    group.append(message.text)
-    if lang == 'ru':
-        bot.send_message(message.from_user.id, 'Вы создали новую группу под названием: {0}'.format(message.text))#group[-1]
+    g.group.append(message.text)
+    if g.lang == 'ru':
+        bot.send_message(message.from_user.id,
+                         'Вы создали новую группу под названием: {0}'.format(message.text))  # group[-1]
     else:
         bot.send_message(message.from_user.id, 'You created a new group called: {0}'.format(message.text))
-    location = 'main_menu'#debug
+    location = 'main_menu'  # debug
     main_menu(message)
 
-#Привітання
+
+# Привітання
 @bot.message_handler(commands=['start'])
 def handle_start(message):
-    #init
-    global lang, location
-    # lang = 'en'#щоб при старті залишалась мова
-    location = 'main_menu'
-    global years, month, days, hours, minutes
-    now = datetime.datetime.now()
-    years, month, days = now.year, now.month, now.day
-    hours, minutes = 12, 0
-    current_shown_dates = {}
-    group = []  # {}
-    work = {}
-    #
-    if lang == 'ru':
+    g.location = ['main_menu']
+    g.group = []
+    if g.lang == 'ru':
         bot.send_message(message.from_user.id, "Добро пожаловать!")
     else:
         bot.send_message(message.from_user.id, "Welcome!")
-    main_menu(message)#згенерировать клавиатуру меню
+    main_menu(message)  # згенерировать клавиатуру меню
 
 
-#Стоп
+# Стоп
 @bot.message_handler(commands=['stop'])
 def hendle_stop(message):
     hide_markup = telebot.types.ReplyKeyboardRemove()
-    if lang == 'ru':
+    if g.lang == 'ru':
         bot.send_message(message.from_user.id, 'Пока!', reply_markup=hide_markup)
     else:
         bot.send_message(message.from_user.id, 'Goodbye!', reply_markup=hide_markup)
 
-#изминения языка
+
+# изминения языка
 @bot.message_handler(content_types=['text'])
 def handle_language(message):
-    global lang
-    global location
-    global group
-    global work
-    global edit_note_work  # (назва замітки) яка вказує, на словник параметрів замітки ('time': '...', 'descript':'...')
-
-    if location == 'main_menu':
+    if g.location == ['main_menu']:
         if message.text == 'Рабочие' or message.text == 'Workers':
-            location = 'workers'
+            g.location = ['workers']
             workers(message)
         elif message.text == 'Домашние' or message.text == 'Home':
-            location = 'home'
+            g.location = ['home']
             home(message)
         elif message.text == 'Срочные' or message.text == 'Urgent':
-            location = 'urgent'
+            g.location = ['urgent']
             urgent(message)
         elif message.text == 'Настройки' or message.text == 'Settings':
-            location = 'settings'
+            g.location = ['settings']
             sett_lang(message)
         elif message.text == 'Другие' or message.text == 'Other':
-            location = 'other'
+            g.location = ['other']
             other(message)
         elif message.text == 'Добавить группу' or message.text == 'Add group':
-            location = 'add_group'
+            g.location = ['add_group']
             hide_markup = telebot.types.ReplyKeyboardRemove()
-            if lang == 'ru':
+            if g.lang == 'ru':
                 bot.send_message(message.from_user.id, "Введите название группы:", reply_markup=hide_markup)
             else:
                 bot.send_message(message.from_user.id, "Enter group name:", reply_markup=hide_markup)
 
-    elif location[:7] == 'workers':
-        if location == 'workers/add_note':
-            edit_note_work = message.text
-            work[edit_note_work] = {}  # назва замітки є силкою на словник параметрів сторінки
-            location = 'workers/add_note_time1' # вибір дня
-            # if lang == 'ru':
-            #     bot.send_message(message.from_user.id, 'Введите время:')
-            # else:
-            #     bot.send_message(message.from_user.id, 'Enter time:')
-            get_calendar(message)  # викликаємо генерацію календаря
-        elif location == 'workers/add_note_time2':  # вибір години
+    elif g.location[0] == 'workers':
+        if g.location == ['workers']:
+            if message.text == 'Добавить заметку' or message.text == 'Add note':
+                g.location.append('add_note')
+                myClass.work.add_note(bot, message, g.lang)
+            elif message.text == 'Назад' or message.text == 'Back':
+                g.location = ['main_menu']
+                main_menu(message)
+        elif g.location[1] == 'add_note':
+            g.location[1] = 'add_note_time1'
+            myClass.work.add_note_name(message.text)
+            myClass.work.get_calendar(bot, message, g.lang)# викликаємо генерацію календаря
+            # коли натиснемо на календар, зміниться  g.location[1]  'add_note_time1' -> 'add_note_time2'
+        elif g.location[1] == 'add_note_time2':  # коли вибрали час
             if message.text == "Дальше" or message.text == "OK":
-                work[edit_note_work]['time'] = (years, month, days, hours, minutes)
-                location = 'workers/add_note_description'
-                if lang == 'ru':
-                    bot.send_message(message.from_user.id, "Введите описание заметки")
-                else:
-                    bot.send_message(message.from_user.id, "Enter a note description")
-        elif location == 'workers/add_note_description':
-            work[edit_note_work]['description'] = message.text
-            edit_note_work = "" # для Debug
-            print("work:", work)
-            location = 'workers'
+                g.location[1] = 'add_note_description'
+                myClass.work.add_note_time(bot, message, g.lang)
+        elif g.location[1] == 'add_note_description':
+            g.location = ['workers']
+            myClass.work.add_note_description(message)
+            #print("myClass.work.some_group:", myClass.work.some_group)
             workers(message)
 
-        #location == workers
-        elif location == 'workers':
-            if message.text == 'Добавить заметку' or message.text == 'Add note':
-                location += '/'+'add_note'
-                hide_markup = telebot.types.ReplyKeyboardRemove()
-                if lang == 'ru':
-                    bot.send_message(message.from_user.id, "Введите название заметки", reply_markup=hide_markup)
-                else:
-                    bot.send_message(message.from_user.id, "Enter a note name", reply_markup=hide_markup)
-                    #continue work
-
-            elif message.text == 'Назад' or message.text == 'Back':
-                location = 'main_menu'
-                main_menu(message)
-    elif location == 'home':
+    elif g.location == ['home']:
+        #
         if message.text == 'Назад' or message.text == 'Back':
-            location = 'main_menu'
+            g.location = ['main_menu']
             main_menu(message)
-    elif location == 'urgent':
+    elif g.location == ['urgent']:
         if message.text == 'Назад' or message.text == 'Back':
-            location = 'main_menu'
+            g.location = ['main_menu']
             main_menu(message)
-    elif location == 'settings':
+    elif g.location == ['settings']:
         if message.text == "English":
-            lang = 'en'
+            g.lang = 'en'
             sett_lang(message)
         elif message.text == "Русский":
-            lang = 'ru'
+            g.lang = 'ru'
             sett_lang(message)
         elif message.text == 'Назад' or message.text == 'Back':
-            location = 'main_menu'
+            g.location = ['main_menu']
             main_menu(message)
-    elif location == 'other':
-        #add group
+    elif g.location == ['other']:
+        # add group
         # if message.text in group:
         #     location += '/'+message.text
         #     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
         #     if lang == 'ru':
-        #         user_markup.row('Добавить заметку')
+        #         user_markup.row('Добавить заметку')# в группу
         #     else:
         #         user_markup.row('Add note')
         if message.text == 'Назад' or message.text == 'Back':
-            location = 'main_menu'
+            g.location = ['main_menu']
             main_menu(message)
 
-    elif location == 'add_group':
+    elif g.location == ['add_group']:
         add_group(message)
-        #debug test
+        # debug test
     log(message)
 
-#calendar handle
-    #inline create
-@bot.message_handler(commands=['calendar'])
-def get_calendar(message):
-    global lang
-    global hours, minutes
-    hours, minutes = 12, 0#Стандартні параметри
-    now = datetime.datetime.now()  # Current date
-    date = (now.year, now.month)
-    current_shown_dates[message.from_user.id] = date  # Saving the current date in a dict
-    markup = create_calendar(now.year, now.month) # створюємо inline calendar
-    if lang == 'ru':
-        bot.send_message(message.chat.id, "Выберите дату", reply_markup=markup)  # виводимо календар
-    else:
-        bot.send_message(message.chat.id, "Please, choose a date", reply_markup=markup)# виводимо календар
-    # get_watch(message)
 
-@bot.message_handler(commands=['clock'])#delete func
-def get_watch(message):
-     global hours, minutes
-     markup = create_watch(hours, minutes)
-     bot.send_message(message.chat.id, "Chose hourse", reply_markup=markup)
+# calendar handle
+# inline create
+# @bot.message_handler(commands=['calendar'])
 
-    #inline handle
+
+# inline handle
 @bot.callback_query_handler(func=lambda call: call.data[0:13] == 'calendar-day-')
 def get_day(call):
-    global work
-    global edit_note_work
-    global location, lang
-    global years, month, days, hours, minutes
-    print(call.data, call)
-    chat_id = call.message.chat.id
-    saved_date = current_shown_dates.get(chat_id)
-    if (saved_date is not None):
-        print("saved_date: ", saved_date)
-        day = call.data[13:] #день на который нажал юзер
-        date = datetime.datetime(int(saved_date[0]), int(saved_date[1]), int(day), hours, minutes)
-        years = int(saved_date[0])
-        month = int(saved_date[1])
-        days = int(day)
-        bot.send_message(chat_id, str(date))
-        bot.answer_callback_query(call.id, text="")
-
-        if location == 'workers/add_note_time1':
-            location = 'workers/add_note_time2'
-            # get_watch()
-            if lang == 'ru':
-                bot.send_message(call.from_user.id, "Выберете время", reply_markup=create_watch(hours, minutes))
-                user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-                user_markup.row("Дальше")
-                bot.send_message(call.from_user.id, "И нажмите на кнопку \"Дальше\"",
-                                 reply_markup=user_markup)
-            else:
-                bot.send_message(call.from_user.id, "Select the time", reply_markup=create_watch(hours, minutes))
-                user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-                user_markup.row("OK")
-                bot.send_message(call.from_user.id, "And click on the button \"OK\"",
-                                 reply_markup=user_markup)
-
-    else:
-        # Do something to inform of the error
-        pass
+    # якщо функція нормально спрацювала повертається 'workers/add_note_time2',
+    g.location = myClass.work.get_day(bot, call, g.location, g.lang)  # інакше повертається місце де ми зараз є ('workers/add_note_time1')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next-month')
 def next_month(call):
-    chat_id = call.message.chat.id
-    saved_date = current_shown_dates.get(chat_id)
-    if saved_date is not None:
-        year, month = saved_date
-        month += 1
-        if month > 12:
-            month = 1
-            year += 1
-        date = (year, month)
-        current_shown_dates[chat_id] = date
-        markup = create_calendar(year, month)
-        bot.edit_message_text("Please, choose a date", call.from_user.id, call.message.message_id, reply_markup=markup)
-        bot.answer_callback_query(call.id, text="")
-    else:
-        # Do something to inform of the error
-        pass
-
+    myClass.work.next_month(bot, call, g.lang)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'previous-month')
 def previous_month(call):
-    chat_id = call.message.chat.id
-    saved_date = current_shown_dates.get(chat_id)
-    if saved_date is not None:
-        year, month = saved_date
-        month -= 1
-        if month < 1:
-            month = 12
-            year -= 1
-        date = (year, month)
-        current_shown_dates[chat_id] = date
-        markup = create_calendar(year, month)
-        bot.edit_message_text("Please, choose a date", call.from_user.id, call.message.message_id, reply_markup=markup)
-        bot.answer_callback_query(call.id, text="")
-    else:
-        # Do something to inform of the error
-        pass
+    myClass.work.previous_month(bot, call, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours' or call.data == 'hours_inc')
 def hours_increment(call):
-    global hours, minutes
-    hours += 1
-    if hours >= 24:
-        hours -= 24
-    print("hours and minutes:", hours, minutes)
-    bot.edit_message_reply_markup(chat_id=call.from_user.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=create_watch(hours, minutes)
-                                  )
-    # bot.edit_message_text(chat_id=call.from_user.id,
-    #                       message_id=call.message.message_id,
-    #                       text="lol",
-    #                       )
-
+    myClass.work.hours_increment(bot, call)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours_dec')
 def hours_decrement(call):
-    global hours, minutes
-    hours -= 1
-    if hours < 0:
-        hours += 24
-    print("hours and minutes:", hours, minutes)
-    bot.edit_message_reply_markup(chat_id=call.from_user.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=create_watch(hours, minutes))
+    myClass.work.hours_decrement(bot, call)
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_inc')
 def minut_increment(call):
-    global hours, minutes
-    minutes += 10
-    if minutes >= 60:
-        minutes -= 60  # обнуление счетчика
-    bot.edit_message_reply_markup(chat_id=call.from_user.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=create_watch(hours, minutes))
+    myClass.work.minut_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minutes')
 def minutes_increment(call):
-    global hours, minutes
-    minutes += 5
-    if minutes >= 60:
-        minutes -= 60  # обнуление счетчика
-    bot.edit_message_reply_markup(chat_id=call.from_user.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=create_watch(hours, minutes))
+    myClass.work.minutes_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_dec')
 def minut_decrement(call):
-    global hours, minutes
-    minutes -= 10
-    if minutes < 0:
-        minutes += 60  # обнуление счетчика
-    bot.edit_message_reply_markup(chat_id=call.from_user.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=create_watch(hours, minutes))
+    myClass.work.minut_decrement(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'ignore')
 def ignore(call):
-    bot.answer_callback_query(call.id, text="")
+    myClass.work.ignore(bot, call)
 
 
 bot.polling(none_stop=True, interval=0)
-#TODO Додати опис замітки
-#Зробити реліз (Залити на серв щоб замовник зміг затестити прогу)
-#подумати чи потрібно при натискані на кнопки ховати клавіатуру
-#реалізувати додавання заміток до рабочие
-# домашние
-# другие
-#Опис до заміток при натисканні на замітку
-#в меню налаштувань змінити пояс
-#додати появлення в срочних заміток
-#В другие добавить кнопку создать группу
-#В группе додати кнопку создати замітку
-#Додати emoji
-#Перевірити global у всіх функціях
-#Перевірити мову у всіх функціях
-#Очистку данных при комманде stop
-#Отменна при создании заметки
-#Замінити chat на from_user
-#Функцію скидання налаштувань
-#Дата создания заметки
-#При закінченні введення опису замітки виводити замітку і питати чи дійсно ви хочете її додати
-#При введенні замітки реалізувати можливість пропустити
-#виводити не 0 а 00
-#Якщо до дати спрацювання замітки залишилось пару днів то виводити дату спрацювання замітки
-#Якщо до дати спрацювання замітки в цей день то виводити годину:хвилину спрацювання
-#Перевірити на баги якщо викликається workers а дата не введена
+# TODO @bot.callback_query_handler(func=lambda call: call.data[0:13] == 'calendar-day-') перенести в клас після того як код буде робочим
+# TODO Переробити код через клас
+# Винести побільше кода в клас
+# для заметок в кортежі години і хвилини зберігати в str
+# Зробити базу для зберігання інформації про час в класі
+# реалізувати додавання заміток до
+# TODO  домашние
+#   другие
+# Опис до заміток при натисканні на замітку
+# в меню налаштувань змінити часовий пояс
+# додати появлення в срочних заміток
+# В другие добавить кнопку создать группу
+# В группе додати кнопку создати замітку
+# Додати emoji
+# Перевірити global у всіх функціях
+# Перевірити мову у всіх функціях
+# Очистку данных при комманде stop
+# Отменна при создании заметки
+# Замінити chat на from_user
+# Функцію скидання налаштувань
+# Дата создания заметки
+# При закінченні введення опису замітки виводити замітку і питати чи дійсно ви хочете її додати
+# При введенні замітки реалізувати можливість пропустити
+# виводити не 0 а 00
+# Якщо до дати спрацювання замітки залишилось пару днів то виводити дату спрацювання замітки
+# Якщо до дати спрацювання замітки в цей день то виводити годину:хвилину спрацювання
+# Перевірити на баги якщо викликається workers а дата не введена
+# -Зробити реліз (Залити на серв щоб замовник зміг затестити прогу)
+# подумати чи потрібно при натискані на кнопки ховати клавіатуру
+# -Перенести обнуління змінних в функцію старт
+# Вы создали новую заметку под названием
+# Коментарії до g.py
+# Переписати код під python2 щоб виставити його на хероку
+# перевірити lang у всіх функціях
+# years month days hours minutes -> time = {'years': "...", 'month': "...",  ...}
+# При виборі дати міняти кнопки на кнопки годанника
+# Видалити current_shown_dates
+# додати Traceback для get_day(), next_month(), ...
+# поміняти місцями опис до замітки і дату введення
+# вводити дату по натисканні на кнопку Додати дату
+# вводити час тільки при натисканні на кнопку додати час
+# Виправити баг: коли після того як вводиш час нажати, не ОК а відправити якийсь текст кнопка пропадає
