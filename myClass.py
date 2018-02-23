@@ -53,8 +53,8 @@ class NOTE:
             if name_note != "":  # для Debug
                 format_date = str(self.some_group[name_note]['time']['hour']) + ":" \
                               + str(self.some_group[name_note]['time']['minute']) + "\n" \
-                            + str(self.some_group[name_note]['time']['day']) + "." \
-                            + str(self.some_group[name_note]['time']['month']) + "." \
+                              + str(self.some_group[name_note]['time']['day']) + "." \
+                              + str(self.some_group[name_note]['time']['month']) + "." \
                               + str(self.some_group[name_note]['time']['year'])
 
                 user_markup.row(name_note, self.some_group[name_note]['description'],  format_date, )  # Вивести замітку і гарно відформатований час       18:36

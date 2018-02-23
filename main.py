@@ -60,17 +60,6 @@ def urgent(message):
     myClass.urgent.main(bot, message, g.lang)
 
 
-def sett_lang(message):
-    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    user_markup.row('Русский', 'English')
-
-    if g.lang == 'ru':
-        user_markup.row('Назад')
-        bot.send_message(message.from_user.id, "Вы в настройках.", reply_markup=user_markup)
-    else:
-        user_markup.row('Back')
-        bot.send_message(message.from_user.id, "You are in the settings.", reply_markup=user_markup)
-
 
 def other(message):
     print("hello from def other(message):")
@@ -93,6 +82,23 @@ def other(message):
     #         user_markup.add(group[i])
     #     user_markup.row('Back')
     #     bot.send_message(message.from_user.id, , reply_markup=user_markup)
+
+
+def some_other_group(message, some_group_name):
+    myClass.other[some_group_name].main(bot, message, g.lang)
+
+
+def sett_lang(message):
+    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    user_markup.row('Русский', 'English')
+
+    if g.lang == 'ru':
+        user_markup.row('Назад')
+        bot.send_message(message.from_user.id, "Вы в настройках.", reply_markup=user_markup)
+    else:
+        user_markup.row('Back')
+        bot.send_message(message.from_user.id, "You are in the settings.", reply_markup=user_markup)
+
 
 
 def add_group(message):
@@ -230,6 +236,42 @@ def handle_language(message):
         #     g.location = ['main_menu']
         #     main_menu(message)
 
+    elif g.location[0] == 'other':
+        if message.text == 'Назад' or message.text == 'Back':
+             g.location = ['main_menu']
+             main_menu(message)
+        elif g.location == ['other']:
+            for name_group_other in g.group:
+                if name_group_other == message.text:
+                    bot.send_message(message.from_user.id, "Вы нажали на групу " + name_group_other)
+                    g.location.append(name_group_other)
+                    g.count_name_group_other = name_group_other
+                    myClass.other[g.count_name_group_other].main(bot, message, g.lang)
+                    break
+                # name_group_outher група на которую нажали
+        elif g.location == ['other', g.count_name_group_other]:
+            if message.text == 'Добавить заметку' or message.text == 'Add note':
+                g.location.append('add_note')
+                myClass.other[g.count_name_group_other].add_note(bot, message, g.lang)
+            elif message.text == 'Назад' or message.text == 'Back':
+                g.location = ['main_menu']
+                main_menu(message)
+        elif g.location[2] == 'add_note':
+            g.location[2] = 'add_note_time1'
+            myClass.other[g.count_name_group_other].add_note_name(message.text)
+            myClass.other[g.count_name_group_other].get_calendar(bot, message, g.lang)  # викликаємо генерацію календаря
+            # коли натиснемо на календар, зміниться  g.location[2]  'add_note_time1' -> 'add_note_time2'
+        elif g.location[2] == 'add_note_time2':  # коли вибрали час
+            if message.text == "Дальше" or message.text == "OK":
+                g.location[2] = 'add_note_description'
+                myClass.other[g.count_name_group_other].add_note_time(bot, message, g.lang)
+        elif g.location[2] == 'add_note_description':
+            g.location = ['other', g.count_name_group_other]  # debug
+            myClass.other[g.count_name_group_other].add_note_description(message)
+            # print("myClass.work.some_group:", myClass.work.some_group)
+            home(message)
+
+
     elif g.location == ['settings']:
         if message.text == "English":
             g.lang = 'en'
@@ -238,22 +280,6 @@ def handle_language(message):
             g.lang = 'ru'
             sett_lang(message)
         elif message.text == 'Назад' or message.text == 'Back':
-            g.location = ['main_menu']
-            main_menu(message)
-
-    elif g.location == ['other']:
-        for name_group_outher in g.group:
-            if name_group_outher == message.text:
-                bot.send_message(message.from_user.id, "Вы нажали на групу "+ name_group_outher)
-        # add group
-        # if message.text in group:
-        #     location += '/'+message.text
-        #     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-        #     if lang == 'ru':
-        #         user_markup.row('Добавить заметку')# в группу
-        #     else:
-        #         user_markup.row('Add note')
-        if message.text == 'Назад' or message.text == 'Back':
             g.location = ['main_menu']
             main_menu(message)
 
@@ -278,7 +304,7 @@ def get_day(call):
     elif g.location[0] == 'urgent':
         g.location = myClass.urgent.get_day(bot, call, g.location, g.lang)
     elif g.location[0] == 'other':
-        pass
+        g.location = myClass.other[g.count_name_group_other].get_day(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next-month')
@@ -290,7 +316,7 @@ def next_month(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.next_month(bot, call, g.lang)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].next_month(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'previous-month')
@@ -302,7 +328,7 @@ def previous_month(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.previous_month(bot, call, g.lang)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].previous_month(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours' or call.data == 'hours_inc')
@@ -314,7 +340,7 @@ def hours_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.hours_increment(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].hours_increment(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours_dec')
@@ -326,7 +352,7 @@ def hours_decrement(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.hours_decrement(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].hours_decrement(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_inc')
@@ -338,7 +364,7 @@ def minut_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minut_increment(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].minut_increment(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minutes')
@@ -350,7 +376,7 @@ def minutes_increment(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minutes_increment(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].minutes_increment(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_dec')
@@ -362,7 +388,7 @@ def minut_decrement(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.minut_decrement(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].minut_decrement(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'ignore')
@@ -374,7 +400,7 @@ def ignore(call):
     elif g.location[0] == 'urgent':
         myClass.urgent.ignore(bot, call)
     elif g.location[0] == 'other':
-        pass
+        myClass.other[g.count_name_group_other].ignore(bot, call, g.location, g.lang)
 
 
 bot.polling(none_stop=True, interval=0)
