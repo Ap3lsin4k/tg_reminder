@@ -60,13 +60,14 @@ def home(message):
 
 
 def urgent(message):
-    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    if g.lang == 'ru':
-        user_markup.row('Добавить заметку', 'Назад')
-        bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
-    else:
-        user_markup.row('Add note', 'Back')
-        bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
+    myClass.urgent.main(bot, message, g.lang)
+    # user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    # if g.lang == 'ru':
+    #     user_markup.row('Добавить заметку', 'Назад')
+    #     bot.send_message(message.from_user.id, "Нажмите на заметку, чтобы её отредактировать", reply_markup=user_markup)
+    # else:
+    #     user_markup.row('Add note', 'Back')
+    #     bot.send_message(message.from_user.id, "Click on a note to edit it", reply_markup=user_markup)
 
 
 def sett_lang(message):
@@ -186,15 +187,55 @@ def handle_language(message):
             #print("myClass.work.some_group:", myClass.work.some_group)
             workers(message)
 
-    elif g.location == ['home']:
-        #
-        if message.text == 'Назад' or message.text == 'Back':
-            g.location = ['main_menu']
-            main_menu(message)
-    elif g.location == ['urgent']:
-        if message.text == 'Назад' or message.text == 'Back':
-            g.location = ['main_menu']
-            main_menu(message)
+    elif g.location[0] == 'home':
+        if g.location == ['home']:
+            if message.text == 'Добавить заметку' or message.text == 'Add note':
+                g.location.append('add_note')
+                myClass.home.add_note(bot, message, g.lang)
+            elif message.text == 'Назад' or message.text == 'Back':
+                g.location = ['main_menu']
+                main_menu(message)
+        elif g.location[1] == 'add_note':
+            g.location[1] = 'add_note_time1'
+            myClass.home.add_note_name(message.text)
+            myClass.home.get_calendar(bot, message, g.lang)  # викликаємо генерацію календаря
+            # коли натиснемо на календар, зміниться  g.location[1]  'add_note_time1' -> 'add_note_time2'
+        elif g.location[1] == 'add_note_time2':  # коли вибрали час
+            if message.text == "Дальше" or message.text == "OK":
+                g.location[1] = 'add_note_description'
+                myClass.home.add_note_time(bot, message, g.lang)
+        elif g.location[1] == 'add_note_description':
+            g.location = ['home']
+            myClass.home.add_note_description(message)
+            # print("myClass.work.some_group:", myClass.work.some_group)
+            home(message)
+
+    elif g.location[0] == 'urgent':
+        if g.location == ['urgent']:
+            if message.text == 'Добавить заметку' or message.text == 'Add note':
+                g.location.append('add_note')
+                myClass.urgent.add_note(bot, message, g.lang)
+            elif message.text == 'Назад' or message.text == 'Back':
+                g.location = ['main_menu']
+                main_menu(message)
+        elif g.location[1] == 'add_note':
+            g.location[1] = 'add_note_time1'
+            myClass.urgent.add_note_name(message.text)
+            myClass.urgent.get_calendar(bot, message, g.lang)  # викликаємо генерацію календаря
+            # коли натиснемо на календар, зміниться  g.location[1]  'add_note_time1' -> 'add_note_time2'
+        elif g.location[1] == 'add_note_time2':  # коли вибрали час
+            if message.text == "Дальше" or message.text == "OK":
+                g.location[1] = 'add_note_description'
+                myClass.urgent.add_note_time(bot, message, g.lang)
+        elif g.location[1] == 'add_note_description':
+            g.location = ['home']
+            myClass.urgent.add_note_description(message)
+            # print("myClass.work.some_group:", myClass.work.some_group)
+            urgent(message)
+        # if message.text == 'Назад' or message.text == 'Back':
+        #     g.location = ['main_menu']
+        #     main_menu(message)
+
     elif g.location == ['settings']:
         if message.text == "English":
             g.lang = 'en'
@@ -233,46 +274,90 @@ def handle_language(message):
 @bot.callback_query_handler(func=lambda call: call.data[0:13] == 'calendar-day-')
 def get_day(call):
     # якщо функція нормально спрацювала повертається 'workers/add_note_time2',
-    g.location = myClass.work.get_day(bot, call, g.location, g.lang)  # інакше повертається місце де ми зараз є ('workers/add_note_time1')
+    if g.location[0] == 'workers':
+        g.location = myClass.work.get_day(bot, call, g.location, g.lang)  # інакше повертається місце де ми зараз є ('workers/add_note_time1')
+    elif g.location[0] == 'home':
+        g.location = myClass.home.get_day(bot, call, g.location, g.lang)
+    elif g.location[0] == 'urgent':
+        g.location = myClass.urgent.get_day(bot, call, g.location, g.lang)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next-month')
 def next_month(call):
-    myClass.work.next_month(bot, call, g.lang)
+    if g.location[0] == 'workers':
+        myClass.work.next_month(bot, call, g.lang)
+    elif g.location[0] == 'home':
+        myClass.home.next_month(bot, call, g.lang)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.next_month(bot, call, g.lang)
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'previous-month')
 def previous_month(call):
-    myClass.work.previous_month(bot, call, g.lang)
-
+    if g.location[0] == 'workers':
+        myClass.work.previous_month(bot, call, g.lang)
+    elif g.location[0] == 'home':
+        myClass.home.previous_month(bot, call, g.lang)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.previous_month(bot, call, g.lang)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours' or call.data == 'hours_inc')
 def hours_increment(call):
-    myClass.work.hours_increment(bot, call)
+    if g.location[0] == 'workers':
+        myClass.work.hours_increment(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.hours_increment(bot, call)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.hours_increment(bot, call)
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'hours_dec')
 def hours_decrement(call):
-    myClass.work.hours_decrement(bot, call)
+    if g.location[0] == 'workers':
+        myClass.work.hours_decrement(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.hours_decrement(bot, call)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.hours_decrement(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_inc')
 def minut_increment(call):
-    myClass.work.minut_increment(bot, call)
-
+    if g.location[0] == 'workers':
+        myClass.work.minut_increment(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.minut_increment(bot, call)
+    elif g.location[0] == 'urgnet':
+        myClass.urgent.minut_increment(bot, call)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minutes')
 def minutes_increment(call):
-    myClass.work.minutes_increment(bot, call)
+    if g.location[0] == 'workers':
+        myClass.work.minutes_increment(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.minutes_increment(bot, call)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.minutes_increment(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'minut_dec')
 def minut_decrement(call):
-    myClass.work.minut_decrement(bot, call)
+    if g.location[0] == 'workers':
+        myClass.work.minut_decrement(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.minut_decrement(bot, call)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.minut_decrement(bot, call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'ignore')
 def ignore(call):
-    myClass.work.ignore(bot, call)
-
+    if g.location[0] == 'workers':
+        myClass.work.ignore(bot, call)
+    elif g.location[0] == 'home':
+        myClass.home.ignore(bot, call)
+    elif g.location[0] == 'urgent':
+        myClass.urgent.ignore(bot, call)
 
 bot.polling(none_stop=True, interval=0)
 # TODO @bot.callback_query_handler(func=lambda call: call.data[0:13] == 'calendar-day-') перенести в клас після того як код буде робочим
@@ -317,3 +402,4 @@ bot.polling(none_stop=True, interval=0)
 # вводити дату по натисканні на кнопку Додати дату
 # вводити час тільки при натисканні на кнопку додати час
 # Виправити баг: коли після того як вводиш час нажати, не ОК а відправити якийсь текст кнопка пропадає
+# Подумати як зменшити повторяючийся код в останніх 9 функціях

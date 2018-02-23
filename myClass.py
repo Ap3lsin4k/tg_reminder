@@ -26,7 +26,7 @@ class NOTE:
 
     def add_note_name(self, message_text):  # handle note name
         self.edit_note_work = message_text  # {('назва замітки') яка вказує (:), на словник параметрів замітки {'time': '...', 'descript': '...'}}
-        self.some_group[self.edit_note_work] = {'time': {'year': None, 'month': None, 'day': None, 'hour': None, 'minute': None},
+        self.some_group[self.edit_note_work] = {'time': {'year': None, 'month': None, 'day': None, 'hour': 12, 'minute': 0},
                                                 'description': ""}
 
     def add_note_day(self, bot, message, lang):  # handle day note
@@ -57,7 +57,7 @@ class NOTE:
                             + str(self.some_group[name_note]['time']['month']) + "." \
                               + str(self.some_group[name_note]['time']['year'])
 
-                user_markup.row(name_note, format_date)  # Вивести замітку і гарно відформатований час       18:36
+                user_markup.row(name_note, self.some_group[name_note]['description'],  format_date, )  # Вивести замітку і гарно відформатований час       18:36
         # print("::::", self.some_group)
         if lang == 'ru':
             user_markup.row('Добавить заметку', 'Назад')
@@ -213,3 +213,4 @@ class NOTE:
 
 work = NOTE("WORKERS")
 home = NOTE("HOME")
+urgent = NOTE("URGENT")
