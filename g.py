@@ -1,7 +1,7 @@
 #global variables
 
 location = ['main_menu']
-lang = 'en'
+lang = 'ru'
 
 group = []  # зберігає назву ключів other груп
 

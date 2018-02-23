@@ -85,8 +85,8 @@ def other(message):
     #     bot.send_message(message.from_user.id, , reply_markup=user_markup)
 
 
-def some_other_group(message, some_group_name):
-    myClass.other[some_group_name].main(bot, message, g.lang)
+def some_other_group(message):
+    myClass.other[g.count_name_group_other].main(bot, message, g.lang)
 
 
 def sett_lang(message):
@@ -270,7 +270,7 @@ def handle_language(message):
             g.location = ['other', g.count_name_group_other]  # debug
             myClass.other[g.count_name_group_other].add_note_description(message)
             # print("myClass.work.some_group:", myClass.work.some_group)
-            home(message)
+            some_other_group(message)
 
 
     elif g.location == ['settings']:
